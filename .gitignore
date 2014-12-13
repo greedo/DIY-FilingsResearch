@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*.pyc
+test.py
+tester.py
+docs/
+hits/
+index/
