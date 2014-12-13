@@ -1,4 +1,4 @@
-**DIY-10FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
+**DIY-FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
 
 Installation
 ---------------
