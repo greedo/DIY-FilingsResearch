@@ -47,7 +47,7 @@ class Ingestor():
                     print('%r generated an exception: %s' % (url, exc))
 
 
-class SEDAR(object):
+class SEDAR():
 
     def __init__(self, start_date, end_date):
         self.org_root = "http://www.sedar.com"
@@ -78,7 +78,7 @@ class SEDAR(object):
         print root
 
 
-class SEC(object):
+class SEC():
 
     def __init__(self, start_date, end_date):
         self.org_root = "http://www.sec.gov"

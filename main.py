@@ -26,10 +26,11 @@ directoryToWalk = "docs"
 # note the indexer thread is set to daemon causing it to terminate on a SIGINT
 indexer = Indexer(queryer.store_dir, queryer.writer, directoryToWalk)
 ingestor = Ingestor()
+sec = SEC()
 
 with open('data.txt', 'r') as reader:
     for line in reader:
-        ingestor.file_downloader(ingestor.ingest_stock(line.rstrip()), directoryToWalk)
+        ingestor.file_downloader(sec.ingest_stock(line.rstrip()), directoryToWalk)
         indexer.indexDocs()
 
 # start up the terminal query interface
