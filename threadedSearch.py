@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
+# encoding: utf-8
 
 # Multithreading Searcher and Indexer. 
 # One Thread Indexes new documents in the background while thread in the foreground waits for new user queries

@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
 from threadedSearch import Queryer, Indexer
 from ingestor import Ingestor
 import signal
