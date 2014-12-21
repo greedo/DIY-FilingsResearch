@@ -14,10 +14,10 @@ setup(
     description='library for analyzing company financial documents',
     author='Joe Cabrera',
     author_email='jcabrera@eminorlabs.com',
-    url='https://github.com/greedo/DIY-10kwizard/',
+    url='https://github.com/greedo/DIY-FilingsResearch/',
     license='Apache License',
-    keywords='Financial, Accounting, file formats, 10k',
-    packages=['wizard'],
+    keywords='Financial, Accounting, file formats, 10k,filings',
+    packages=['research'],
     install_requires=['requests', 'lxml'],
     classifiers=[
         'Intended Audience :: Developers',
