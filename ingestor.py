@@ -8,6 +8,7 @@ from lxml import etree
 import concurrent.futures
 import requests
 import re
+import datetime
 
 try:
     import cStringIO as StringIO
@@ -47,7 +48,7 @@ class Ingestor():
                     print('%r generated an exception: %s' % (url, exc))
 
 
-class SEDAR():
+class Sedar():
 
     def __init__(self, start_date, end_date):
         self.org_root = "http://www.sedar.com"
@@ -78,10 +79,20 @@ class SEDAR():
         print root
 
 
-class SEC():
+class Sec():
 
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date=None, end_date=None):
         self.org_root = "http://www.sec.gov"
+
+        if start_date is None:
+            self.start_date = datetime.date(1970, 01, 01)
+        else:
+            self.start_date = start_date
+
+        if end_date is None:
+            self.end_date = datetime.datetime.now().date()
+        else:
+            self.end_date = end_date
 
     def html_search(self, tree, types):
 

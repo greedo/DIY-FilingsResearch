@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from threadedSearch import Queryer, Indexer
-from ingestor import Ingestor
+from ingestor import Ingestor, Sec, Sedar
 import signal
 import lucene
 
@@ -26,7 +26,7 @@ directoryToWalk = "docs"
 # note the indexer thread is set to daemon causing it to terminate on a SIGINT
 indexer = Indexer(queryer.store_dir, queryer.writer, directoryToWalk)
 ingestor = Ingestor()
-sec = SEC()
+sec = Sec()
 
 with open('data.txt', 'r') as reader:
     for line in reader:
