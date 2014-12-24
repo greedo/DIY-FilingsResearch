@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from threadedSearch import Queryer, Indexer
-from ingestor import Ingestor, Sec, Sedar
+from ingestor import Ingestor, Edgar, Sedar
 import signal
 import lucene
 
@@ -26,11 +26,12 @@ directoryToWalk = "docs"
 # note the indexer thread is set to daemon causing it to terminate on a SIGINT
 indexer = Indexer(queryer.store_dir, queryer.writer, directoryToWalk)
 ingestor = Ingestor()
-sec = Sec()
+edgar = Edgar()
+#sedar = Sedar()
 
 with open('data.txt', 'r') as reader:
     for line in reader:
-        ingestor.file_downloader(sec.ingest_stock(line.rstrip()), directoryToWalk)
+        ingestor.file_downloader(edgar.ingest_stock(line.rstrip()), directoryToWalk)
         indexer.indexDocs()
 
 # start up the terminal query interface

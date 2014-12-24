@@ -8,7 +8,7 @@ from lxml import etree
 import concurrent.futures
 import requests
 import re
-import datetime
+from datetime import datetime, date, time
 
 try:
     import cStringIO as StringIO
@@ -50,36 +50,41 @@ class Ingestor():
 
 class Sedar():
 
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date=None, end_date=None):
         self.org_root = "http://www.sedar.com"
-        start_parts = start_date.split("-")
-        self.start_month = start_parts[0]
-        self.start_date = start_parts[1]
-        self.start_year = start_parts[2]
 
-        end_parts = end_date.split("-")
-        self.end_month = end_parts[0]
-        self.end_date = end_parts[1]
-        self.end_year = end_parts[2]
+        if start_date is None:
+            self.start_date = date(1970, 01, 01)
+        else:
+            self.start_date = datetime.strptime(self.start_date, "%y-%d-%m")
+
+        self.start_month = self.start_date.month
+        self.start_day = self.start_date.day
+        self.start_year = self.start_date.year
+
+        if end_date is None:
+            self.end_date = datetime.now().date()
+        else:
+            self.end_date = datetime.strptime(self.end_date, "%y-%d-%m")
+
+        self.end_month = self.end_date.month
+        self.end_day = self.end_date.day
+        self.end_year = self.end_date.year
 
     def ingest_stock(self, ticker):
 
         to_parse = []
 
-        feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': stock, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': self.start_month, 'FromDate': self.start_date, 'FromYear':  self.start_year, 'ToMonth': self.end_month, 'ToDate': self.end_date, 'ToYear': self.end_year, 'Variable': 'Issuer', 'Search': 'Search'})
+        feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': ticker, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': str(self.start_month), 'FromDate': str(self.start_day), 'FromYear':  str(self.start_year), 'ToMonth': str(self.end_month), 'ToDate': str(self.end_day), 'ToYear': str(self.end_year), 'Variable': 'Issuer', 'Search': 'Search'})
 
         # iso-8859-1 -> utf-8
         processed = feed.text.decode('iso-8859-1').encode('utf8')
 
-        try:
-            ticker_feed = ET.fromstring(processed)
-        except Exception, e:
-            break
-        root = ticker_feed
+        root = ET.fromstring(processed)
         print root
 
 
-class Sec():
+class Edgar():
 
     def __init__(self, start_date=None, end_date=None):
         self.org_root = "http://www.sec.gov"
