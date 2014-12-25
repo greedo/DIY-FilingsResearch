@@ -20,7 +20,7 @@ class Ingestor():
 
     def file_downloader(self, urls, directory):
 
-        if len(urls) == 0:
+        if urls is None or len(urls) == 0:
             return
 
         def load_url(url, timeout):
@@ -77,12 +77,13 @@ class Sedar():
 
         feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': ticker, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': str(self.start_month), 'FromDate': str(self.start_day), 'FromYear':  str(self.start_year), 'ToMonth': str(self.end_month), 'ToDate': str(self.end_day), 'ToYear': str(self.end_year), 'Variable': 'Issuer', 'Search': 'Search'})
 
-        # iso-8859-1 -> utf-8
-        processed = feed.text.decode('iso-8859-1').encode('utf8')
-
-        root = ET.fromstring(processed)
+        # utf-8
+        processed = feed.text.encode('utf-8')
+        try:
+            root = ET.fromstring(processed)
+        except ET.ParseError:
+            return
         print root
-
 
 class Edgar():
 
