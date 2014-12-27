@@ -19,6 +19,11 @@ except ImportError:
 class Ingestor():
 
     def file_downloader(self, urls, directory):
+        """
+        file_downloader asynchronously downloads all required documents using threads.
+        By default the max number of threads running asynchronously is 5, but you can
+        adjust this for your own system.
+        """
 
         if urls is None or len(urls) == 0:
             return
@@ -49,6 +54,9 @@ class Ingestor():
 
 
 class Sedar():
+    """
+    SEDAR is document filing and retrieval system used by the CSA (Canada)
+    """
 
     def __init__(self, start_date=None, end_date=None):
         self.org_root = "http://www.sedar.com"
@@ -72,20 +80,34 @@ class Sedar():
         self.end_year = self.end_date.year
 
     def ingest_stock(self, ticker):
+        """
+        ingest_stock essentially scrapes the site for the actual documents we need to download.
+        It uses a ticker or keyword.
+        """
 
         to_parse = []
 
-        feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': ticker, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': str(self.start_month), 'FromDate': str(self.start_day), 'FromYear':  str(self.start_year), 'ToMonth': str(self.end_month), 'ToDate': str(self.end_day), 'ToYear': str(self.end_year), 'Variable': 'Issuer', 'Search': 'Search'})
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
+        }
+
+        feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': ticker, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': str(self.start_month), 'FromDate': str(self.start_day), 'FromYear':  str(self.start_year), 'ToMonth': str(self.end_month), 'ToDate': str(self.end_day), 'ToYear': str(self.end_year), 'Variable': 'Issuer', 'Search': 'Search'}, headers=headers)
 
         # utf-8
         processed = feed.text.encode('utf-8')
+        print processed
         try:
             root = ET.fromstring(processed)
         except ET.ParseError:
             return
         print root
 
+
+
 class Edgar():
+    """
+    EDGAR is document filing and retrieval system used by the SEC (US)
+    """
 
     def __init__(self, start_date=None, end_date=None):
         self.org_root = "http://www.sec.gov"
@@ -101,6 +123,9 @@ class Edgar():
             self.end_date = end_date
 
     def html_search(self, tree, types):
+        """
+        html_search finds the document url in the document listing html.
+        """
 
         grab_next = False
         tables = list(tree.iter("table"))
@@ -122,6 +147,10 @@ class Edgar():
             pass
 
     def ingest_stock(self, ticker):
+        """
+        ingest_stock essentially scrapes the site for the actual documents we need to download.
+        It uses a ticker or keyword.
+        """
 
         doc_types = ['10-K', '10-Q']
         to_parse = []
