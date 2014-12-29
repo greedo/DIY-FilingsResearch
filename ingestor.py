@@ -8,7 +8,7 @@ from lxml import etree
 import concurrent.futures
 import requests
 import re
-from datetime import datetime, date, time
+import datetime
 
 try:
     import cStringIO as StringIO
@@ -95,7 +95,6 @@ class Sedar():
 
         # utf-8
         processed = feed.text.encode('utf-8')
-        print processed
         try:
             root = ET.fromstring(processed)
         except ET.ParseError:
@@ -103,13 +102,18 @@ class Sedar():
         print root
 
 
-
 class Edgar():
     """
     EDGAR is document filing and retrieval system used by the SEC (US)
     """
 
-    def __init__(self, start_date=None, end_date=None):
+    filing_types = ['10-K', '10-Q']
+    doc_types = {
+        'html': ["Document Format Files", ".htm", filing_types],
+        'xbrl': ["Data Files", ".xml", "XBRL INSTANCE DOCUMENT"]
+        }
+
+    def __init__(self, doc_type=None, start_date=None, end_date=None):
         self.org_root = "http://www.sec.gov"
 
         if start_date is None:
@@ -122,9 +126,14 @@ class Edgar():
         else:
             self.end_date = end_date
 
-    def html_search(self, tree, types):
+        if doc_type == "html":
+            self.doc_type = Edgar.doc_types['html']
+        else:
+            self.doc_type = Edgar.doc_types['xbrl']
+
+    def page_search(self, tree, types):
         """
-        html_search finds the document url in the document listing html.
+        page_search finds the document url in the document listing file links.
         """
 
         grab_next = False
@@ -132,7 +141,7 @@ class Edgar():
 
         try:
             for table in tables:
-                if table.attrib['summary'] == "Document Format Files":
+                if table.attrib['summary'] == self.doc_type[0]:
                     for row in table.findall('tr'):
                         for column in row.findall('td'):
                             if grab_next:
@@ -141,7 +150,7 @@ class Edgar():
                                     return link.attrib['href']
                                     break
                                 grab_next = False
-                            if column.text == types:
+                            if column.text in self.doc_type[2]:
                                 grab_next = True
         except UnicodeEncodeError:
             pass
@@ -152,10 +161,9 @@ class Edgar():
         It uses a ticker or keyword.
         """
 
-        doc_types = ['10-K', '10-Q']
         to_parse = []
 
-        for types in doc_types:
+        for types in self.doc_type[2]:
             feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'count': 200, 'output': 'atom'})
 
             # iso-8859-1 -> utf-8
@@ -173,8 +181,8 @@ class Edgar():
                 output = StringIO.StringIO(requests.get(html_url).text.encode('ascii','ignore'))
                 tree = etree.parse(output, etree.HTMLParser())
         
-                output = self.html_search(tree, types)
-                if output and ".htm" in output:
+                output = self.page_search(tree, types)
+                if output and self.doc_type[1] in output:
                     to_parse.append(self.org_root+output)
 
         return to_parse
