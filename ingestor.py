@@ -171,7 +171,7 @@ class Edgar():
 
             try:
                 ticker_feed = ET.fromstring(processed)
-            except Exception, e:
+            except Exception as e:
                 break
             root = ticker_feed
 
