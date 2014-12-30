@@ -62,7 +62,7 @@ class Sedar():
         self.org_root = "http://www.sedar.com"
 
         if start_date is None:
-            self.start_date = datetime.date(1970, 01, 01)
+            self.start_date = datetime.datetime(1970, 01, 01, 0, 0, 0, 0)
         else:
             self.start_date = datetime.strptime(self.start_date, "%y-%d-%m")
 
@@ -117,7 +117,7 @@ class Edgar():
         self.org_root = "http://www.sec.gov"
 
         if start_date is None:
-            self.start_date = datetime.date(1970, 01, 01)
+            self.start_date = datetime.datetime(1970, 01, 01, 0, 0, 0, 0)
         else:
             self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
 
