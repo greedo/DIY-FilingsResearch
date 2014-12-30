@@ -62,7 +62,7 @@ class Sedar():
         self.org_root = "http://www.sedar.com"
 
         if start_date is None:
-            self.start_date = date(1970, 01, 01)
+            self.start_date = datetime.date(1970, 01, 01)
         else:
             self.start_date = datetime.strptime(self.start_date, "%y-%d-%m")
 
@@ -71,7 +71,7 @@ class Sedar():
         self.start_year = self.start_date.year
 
         if end_date is None:
-            self.end_date = datetime.now().date()
+            self.end_date = datetime.datetime.now().date()
         else:
             self.end_date = datetime.strptime(self.end_date, "%y-%d-%m")
 
@@ -119,12 +119,12 @@ class Edgar():
         if start_date is None:
             self.start_date = datetime.date(1970, 01, 01)
         else:
-            self.start_date = start_date
+            self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
 
         if end_date is None:
             self.end_date = datetime.datetime.now().date()
         else:
-            self.end_date = end_date
+            self.end_date = datetime.datetime.strptime(end_date, "%Y-%d-%m")
 
         if doc_type == "html":
             self.doc_type = Edgar.doc_types['html']
@@ -164,7 +164,7 @@ class Edgar():
         to_parse = []
 
         for types in self.doc_type[2]:
-            feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'count': 200, 'output': 'atom'})
+            feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'dateb': str(self.start_date.strftime("%Y-%d-%m")), 'count': 200, 'output': 'atom'})
 
             # iso-8859-1 -> utf-8
             processed = feed.text.decode('iso-8859-1').encode('utf8')
