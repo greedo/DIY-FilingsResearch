@@ -166,9 +166,8 @@ class Edgar():
         for types in self.doc_type[2]:
             feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'dateb': str(self.start_date.strftime("%Y-%d-%m")), 'count': 200, 'output': 'atom'})
 
-            # iso-8859-1 -> utf-8
-            processed = feed.text.decode('iso-8859-1').encode('utf8')
-
+            # utf-8
+            processed = feed.text.encode('utf-8')
             try:
                 ticker_feed = ET.fromstring(processed)
             except Exception as e:
