@@ -1,4 +1,4 @@
-|Travis-CI|
+|PyPI version| |Travis-CI|
 
 **DIY-FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
 
@@ -48,5 +48,7 @@ License
     specific language governing permissions and limitations
     under the license.
 
+.. |PyPI version| image:: https://badge.fury.io/py/DIY-FilingsResearch.png
+   :target: http://badge.fury.io/py/DIY-FilingsResearch
 .. |Travis-CI| image:: https://travis-ci.org/greedo/DIY-FilingsResearch.png?branch=master
    :target: https://travis-ci.org/greedo/DIY-FilingsResearch
