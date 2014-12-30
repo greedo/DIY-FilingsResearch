@@ -1,3 +1,5 @@
+|Travis-CI|
+
 **DIY-FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
 
 Installation
@@ -45,3 +47,6 @@ License
     KIND, either express or implied.  See the License for the
     specific language governing permissions and limitations
     under the license.
+
+.. |Travis-CI| image:: https://travis-ci.org/greedo/DIY-FilingsResearch.png?branch=master
+   :target: https://travis-ci.org/greedo/DIY-FilingsResearch
