@@ -3,13 +3,20 @@
 **DIY-FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
 
 Installation
----------------
+------------
 
-You will need to install the required libraries using the python package manager pip. If you do not have pip installed you can follow the directions `here <http://pip.readthedocs.org/en/latest/installing.html>`__
+The easiest way to install DIY-FilingsResearch is with pip
 
 ::
 
-     pip install -r requirements.txt
+    sudo pip install DIY-FilingsResearch
+    
+Made sure your **sys.path** is correct. Note it is currently just a collection of scripts.
+
+Requirements
+------------
+
+- Python >= 2.7 or >= 3.4
 
 Testing
 -------
