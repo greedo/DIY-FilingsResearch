@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import xml.etree.ElementTree as ET
 from lxml import etree
@@ -99,7 +99,7 @@ class Sedar():
             root = ET.fromstring(processed)
         except ET.ParseError:
             return
-        print root
+        print(root)
 
 
 class Edgar():
