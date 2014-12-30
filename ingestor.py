@@ -11,9 +11,9 @@ import re
 import datetime
 
 try:
-    import cStringIO as StringIO
+    from StringIO import StringIO
 except ImportError:
-    import StringIO
+    from io import StringIO
 
 
 class Ingestor():
