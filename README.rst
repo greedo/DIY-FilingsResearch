@@ -1,15 +1,22 @@
-|Travis-CI|
+|PyPI version| |Travis-CI|
 
 **DIY-FilingsResearch** is a library for analyzing complex company financial documents from the comfort of your own computer.
 
 Installation
----------------
+------------
 
-You will need to install the required libraries using the python package manager pip. If you do not have pip installed you can follow the directions `here <http://pip.readthedocs.org/en/latest/installing.html>`__
+The easiest way to install DIY-FilingsResearch is with pip
 
 ::
 
-     pip install -r requirements.txt
+    sudo pip install DIY-FilingsResearch
+    
+Made sure your **sys.path** is correct. Note it is currently just a collection of scripts.
+
+Requirements
+------------
+
+- Python >= 2.6 or >= 3.3
 
 Testing
 -------
@@ -48,5 +55,7 @@ License
     specific language governing permissions and limitations
     under the license.
 
+.. |PyPI version| image:: https://badge.fury.io/py/DIY-FilingsResearch.png
+   :target: http://badge.fury.io/py/DIY-FilingsResearch
 .. |Travis-CI| image:: https://travis-ci.org/greedo/DIY-FilingsResearch.png?branch=master
    :target: https://travis-ci.org/greedo/DIY-FilingsResearch
