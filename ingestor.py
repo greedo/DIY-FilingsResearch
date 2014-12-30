@@ -58,13 +58,13 @@ class Sedar():
     SEDAR is document filing and retrieval system used by the CSA (Canada)
     """
 
-    def __init__(self, start_date=None, end_date=None):
+    def __init__(self, doc_type=None, start_date=None, end_date=None):
         self.org_root = "http://www.sedar.com"
 
         if start_date is None:
             self.start_date = datetime.datetime(1970, 1, 1, 0, 0)
         else:
-            self.start_date = datetime.strptime(self.start_date, "%y-%d-%m")
+            self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
 
         self.start_month = self.start_date.month
         self.start_day = self.start_date.day
@@ -73,7 +73,7 @@ class Sedar():
         if end_date is None:
             self.end_date = datetime.datetime.now().date()
         else:
-            self.end_date = datetime.strptime(self.end_date, "%y-%d-%m")
+            self.end_date = datetime.datetime.strptime(end_date, "%Y-%d-%m")
 
         self.end_month = self.end_date.month
         self.end_day = self.end_date.day
