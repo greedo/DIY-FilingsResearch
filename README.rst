@@ -16,7 +16,7 @@ Made sure your **sys.path** is correct. Note it is currently just a collection o
 Requirements
 ------------
 
-- Python >= 2.7 or >= 3.4
+- Python >= 2.6 or >= 3.3
 
 Testing
 -------
