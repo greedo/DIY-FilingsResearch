@@ -3,6 +3,7 @@
 
 from ingestor import Ingestor, Edgar, Sedar
 import os
+import shutil
 import sys
 sys.path.insert(0, os.path.abspath('./'))
 import pytest
@@ -11,8 +12,11 @@ from ingestor import Ingestor, Edgar, Sedar
 
 docs_directory = "test"
 
-if not os.path.exists(docs_directory):
-    os.mkdir(docs_directory)
+def setup_module():
+    """ create folder for downloading docs """
+
+    if not os.path.exists(docs_directory):
+        os.mkdir(docs_directory)
 
 def test_download_html():
     
@@ -30,3 +34,10 @@ def test_download_xbrl():
     ingestor.file_downloader(edgar.ingest_stock("AAPL"), docs_directory)
 
     assert os.path.exists(docs_directory+"/aapl-20130928.xml") == True
+
+
+def teardown_module():
+    """ remove the folder for downloading docs """
+
+    if os.path.exists(docs_directory):
+        shutil.rmtree(docs_directory)
