@@ -6,9 +6,11 @@ from __future__ import absolute_import, print_function
 import xml.etree.ElementTree as ET
 from lxml import etree
 import concurrent.futures
-import requests
+import requests, requests.utils
 import re
 import datetime
+import os
+import webbrowser
 
 try:
     from StringIO import StringIO
@@ -79,6 +81,19 @@ class Sedar():
         self.end_day = self.end_date.day
         self.end_year = self.end_date.year
 
+    def return_link(self, needle, endpoint, params=None, index_offset=0):
+
+        feed = session.get(self.org_root+endpoint, params=params, headers=headers, cookies=store)
+
+        output = StringIO(feed.text.encode('utf-8'))
+        tree = etree.parse(output, etree.HTMLParser())
+        links = list(tree.iter("a"))
+
+        for l in range(0, len(links)):
+            if needle in links[l].attrib['href']:
+                return links[l-index_offset].attrib['href']
+                break
+
     def ingest_stock(self, ticker):
         """
         ingest_stock essentially scrapes the site for the actual documents we need to download.
@@ -91,15 +106,29 @@ class Sedar():
             'User-Agent': 'DIY-FilingsResearch 0.1'
         }
 
-        feed = requests.get(self.org_root+'/FindCompanyDocuments.do', params={'lang': 'EN', 'page_no': '1', 'company_search': ticker, 'document_selection': 5, 'industry_group': 'A', 'FromMonth': str(self.start_month), 'FromDate': str(self.start_day), 'FromYear':  str(self.start_year), 'ToMonth': str(self.end_month), 'ToDate': str(self.end_day), 'ToYear': str(self.end_year), 'Variable': 'Issuer', 'Search': 'Search'}, headers=headers)
+        initial_params = {
+            'lang': 'EN',
+            'page_no': '1',
+            'company_search': ticker,
+            'document_selection': 5,
+            'industry_group': 'A',
+            'FromMonth': self.start_month,
+            'FromDate': self.start_day,
+            'FromYear': self.start_year,
+            'ToMonth': self.end_month,
+            'ToDate': self.end_date,
+            'ToYear': self.end_year,
+            'Variable': 'Issuer',
+            'Search': 'Search'
+        }
 
-        # utf-8
-        processed = feed.text.encode('utf-8')
-        try:
-            root = ET.fromstring(processed)
-        except ET.ParseError:
-            return
-        print(root)
+        session = requests.session()
+
+        initial_request = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers)
+        store = requests.utils.dict_from_cookiejar(initial_request.cookies)
+
+        link = return_link("DisplayProfile", return_link("DisplayCompanyDocuments", return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", initial_params, 1)))
+        webbrowser.open_new_tab(self.org_root+link)
 
 
 class Edgar():
@@ -166,13 +195,10 @@ class Edgar():
         for types in self.doc_type[2]:
             feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'dateb': str(self.start_date.strftime("%Y-%d-%m")), 'count': 200, 'output': 'atom'})
 
-            # utf-8
-            processed = feed.text.encode('utf-8')
             try:
-                ticker_feed = ET.fromstring(processed)
+                ticker_feed = ET.fromstring(feed.text.encode('utf-8'))
             except Exception as e:
                 break
-            root = ticker_feed
 
             for item in ticker_feed.findall('{http://www.w3.org/2005/Atom}entry'):
                 html_url = item[1].find('{http://www.w3.org/2005/Atom}filing-href').text.encode('ascii','ignore')
