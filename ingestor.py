@@ -10,7 +10,14 @@ import requests, requests.utils
 import re
 import datetime
 import os
-import webbrowser
+import selenium
+from selenium import webdriver
+import httplib
+
+try:
+    from cookielib import Cookie, CookieJar
+except ImportError:
+    from http.cookiejar import Cookie, CookieJar
 
 try:
     from StringIO import StringIO
@@ -129,6 +136,35 @@ class Sedar():
 
         link = return_link("DisplayProfile", return_link("DisplayCompanyDocuments", return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", initial_params, 1)))
         webbrowser.open_new_tab(self.org_root+link)
+
+        driver = selenium.webdriver.Firefox()
+        driver.get(self.org_root+link)
+        accept_cookies = None
+        print "once you accept you can close the window"
+
+        while True:
+
+            if accept_cookies is None:
+                accept_cookies = driver.get_cookies()
+
+            try:
+                driver.get_cookies()
+            except selenium.common.exceptions.NoSuchWindowException:
+                break
+            except httplib.BadStatusLine:
+                break
+
+        cj = CookieJar()
+        for cookie in accept_cookies:
+            c = Cookie(None, cookie['value'], None, '80', '80', cookie['domain'],
+                       None, None, cookie['path'], None, False, False, cookie['name'], None, None, None)
+            cj.set_cookie(c)
+
+        store = requests.utils.dict_from_cookiejar(cj)
+        feed = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers, cookies=store)
+
+        processed = feed.text.encode('utf-8')
+        print processed
 
 
 class Edgar():
