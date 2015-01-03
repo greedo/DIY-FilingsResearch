@@ -12,7 +12,11 @@ import datetime
 import os
 import selenium
 from selenium import webdriver
-import httplib
+
+try:
+    import httplib
+except ImportError:
+    import http.client as httplib
 
 try:
     from cookielib import Cookie, CookieJar
@@ -89,6 +93,9 @@ class Sedar():
         self.end_year = self.end_date.year
 
     def return_link(self, needle, endpoint, params=None, index_offset=0):
+        """
+        return_link finds a needle link in a haystack of links on an html page
+        """
 
         feed = session.get(self.org_root+endpoint, params=params, headers=headers, cookies=store)
 
