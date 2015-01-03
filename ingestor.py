@@ -140,7 +140,7 @@ class Sedar():
         driver = selenium.webdriver.Firefox()
         driver.get(self.org_root+link)
         accept_cookies = None
-        print "once you accept you can close the window"
+        print("once you accept you can close the window")
 
         while True:
 
@@ -164,7 +164,7 @@ class Sedar():
         feed = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers, cookies=store)
 
         processed = feed.text.encode('utf-8')
-        print processed
+        print(processed)
 
 
 class Edgar():
