@@ -159,10 +159,7 @@ class Sedar():
             except httplib.BadStatusLine:
                 break
 
-        store = {}
-        for cookie in accept_cookies:
-            store[cookie['name']] = cookie['value']
-
+        cookies = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
         feed = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers, cookies=store)
 
         processed = feed.text.encode('utf-8')
