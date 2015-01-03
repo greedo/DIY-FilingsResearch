@@ -26,6 +26,11 @@ except ImportError:
 
 class Ingestor():
 
+    _HTML_decode = [
+        ('%3A', '_'),
+        ('%5C', '_')
+    ]
+
     def file_downloader(self, urls, directory):
         """
         file_downloader asynchronously downloads all required documents using threads.
@@ -53,6 +58,11 @@ class Ingestor():
                     if data.status_code == requests.codes.ok:
 
                         local_filename = url['url'].split('/')[-1]
+
+                        # clean up gross filenames
+                        for k, v in _HTML_decode:
+                            local_filename = local_filename.replace(k, v)
+
                         with open(directory+"/"+local_filename, 'wb') as handle:
                             for block in data.iter_content(chunk_size=1024):
                                 if not block:
@@ -90,6 +100,11 @@ class Sedar():
         self.end_day = self.end_date.day
         self.end_year = self.end_date.year
 
+        if doc_type == "html":
+            self.doc_type = 5
+        else:
+            self.doc_type = 26
+
     def return_link(self, needle, endpoint, params=None, index_offset=0):
         """
         return_link finds a needle link in a haystack of links on an html page
@@ -122,7 +137,7 @@ class Sedar():
             'lang': 'EN',
             'page_no': '1',
             'company_search': ticker,
-            'document_selection': 5,
+            'document_selection': self.doc_type,
             'industry_group': 'A',
             'FromMonth': self.start_month,
             'FromDate': self.start_day,
@@ -136,11 +151,10 @@ class Sedar():
 
         session = requests.session()
 
-        initial_request = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers)
+        initial_request = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=headers)
         store = requests.utils.dict_from_cookiejar(initial_request.cookies)
 
         link = return_link("DisplayProfile", return_link("DisplayCompanyDocuments", return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", initial_params, 1)))
-        webbrowser.open_new_tab(self.org_root+link)
 
         driver = selenium.webdriver.Firefox()
         driver.get(self.org_root+link)
@@ -160,7 +174,7 @@ class Sedar():
                 break
 
         cookies = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
-        feed = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers, cookies=store)
+        feed = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=headers, cookies=store)
 
         processed = feed.text.encode('utf-8')
         tree = etree.parse(StringIO(processed), etree.HTMLParser())
