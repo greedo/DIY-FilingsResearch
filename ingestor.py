@@ -19,11 +19,6 @@ except ImportError:
     import http.client as httplib
 
 try:
-    from cookielib import Cookie, CookieJar
-except ImportError:
-    from http.cookiejar import Cookie, CookieJar
-
-try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
@@ -42,7 +37,10 @@ class Ingestor():
             return
 
         def load_url(url, timeout):
-            request = requests.get(url, stream=True, timeout=timeout)
+            if url['type'] == "GET":
+                request = requests.get(url['url'], stream=True, timeout=timeout)
+            elif url['type'] == "POST":
+                request = requests.post(url['url'], headers=url['headers'], cookies=url['cookies'], stream=True, timeout=timeout)
             return request
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -54,7 +52,7 @@ class Ingestor():
 
                     if data.status_code == requests.codes.ok:
 
-                        local_filename = url.split('/')[-1]
+                        local_filename = url['url'].split('/')[-1]
                         with open(directory+"/"+local_filename, 'wb') as handle:
                             for block in data.iter_content(chunk_size=1024):
                                 if not block:
@@ -161,17 +159,25 @@ class Sedar():
             except httplib.BadStatusLine:
                 break
 
-        cj = CookieJar()
+        store = {}
         for cookie in accept_cookies:
-            c = Cookie(None, cookie['value'], None, '80', '80', cookie['domain'],
-                       None, None, cookie['path'], None, False, False, cookie['name'], None, None, None)
-            cj.set_cookie(c)
+            store[cookie['name']] = cookie['value']
 
-        store = requests.utils.dict_from_cookiejar(cj)
         feed = session.get(self.org_root+'/FindCompanyDocuments.do', params=initial_params, headers=headers, cookies=store)
 
         processed = feed.text.encode('utf-8')
-        print(processed)
+        tree = etree.parse(StringIO(processed), etree.HTMLParser())
+        links = list(tree.iter("form"))
+
+        urls = [self.org_root+link.attrib['action'] for link in links]
+
+        for url in urls:
+            to_parse.append({'url': url,
+                             'type': 'POST',
+                             'headers': headers,
+                             'cookies': store
+                            })
+        return to_parse
 
 
 class Edgar():
@@ -251,6 +257,7 @@ class Edgar():
         
                 output = self.page_search(tree, types)
                 if output and self.doc_type[1] in output:
-                    to_parse.append(self.org_root+output)
-
+                    to_parse.append({'url': self.org_root+output,
+                                     'type': 'GET'
+                                    })
         return to_parse
