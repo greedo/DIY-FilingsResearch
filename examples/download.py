@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-from ingestor import Ingestor, Edgar, Sedar
 import os
+from ingestor import Ingestor, IngestorException, Edgar, Sedar
 
 ingestor = Ingestor()
 

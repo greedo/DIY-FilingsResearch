@@ -74,6 +74,9 @@ class Ingestor():
                     print('%r generated an exception: %s' % (url, exc))
 
 
+class IngestorException(Exception):
+    pass
+
 class Sedar():
     """
     SEDAR is document filing and retrieval system used by the CSA (Canada)
@@ -90,10 +93,14 @@ class Sedar():
     def __init__(self, doc_type=None, start_date=None, end_date=None):
         self.org_root = "http://www.sedar.com"
 
+        # error will occur if you use a start_date prior to 1/1/1997
         if start_date is None:
             self.start_date = datetime.datetime(1997, 1, 1, 0, 0)
         else:
             self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
+
+            if self.start_date <= '1997-01-01':
+                raise IngestorException('use a start_date after 1/1/1997')
 
         self.start_month = self.start_date.month
         self.start_day = self.start_date.day
