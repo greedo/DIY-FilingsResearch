@@ -43,7 +43,7 @@ class Ingestor():
 
         def load_url(url, timeout):
             if url['type'] == "GET":
-                request = requests.get(url['url'], stream=True, timeout=timeout)
+                request = requests.get(url['url'], headers=url['headers'], stream=True, timeout=timeout)
             elif url['type'] == "POST":
                 request = requests.post(url['url'], headers=url['headers'], cookies=url['cookies'], stream=True, timeout=timeout)
             return request
@@ -79,11 +79,19 @@ class Sedar():
     SEDAR is document filing and retrieval system used by the CSA (Canada)
     """
 
+    __cookies = {'initial': None,
+                 'download': None
+                }
+
+    __headers = {
+        'User-Agent': 'DIY-FilingsResearch 0.1'
+    }
+
     def __init__(self, doc_type=None, start_date=None, end_date=None):
         self.org_root = "http://www.sedar.com"
 
         if start_date is None:
-            self.start_date = datetime.datetime(1970, 1, 1, 0, 0)
+            self.start_date = datetime.datetime(1997, 1, 1, 0, 0)
         else:
             self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
 
@@ -105,12 +113,13 @@ class Sedar():
         else:
             self.doc_type = 26
 
-    def return_link(self, needle, endpoint, params=None, index_offset=0):
+    @staticmethod
+    def return_link(needle, endpoint, headers, cookies, params=None, index_offset=0):
         """
         return_link finds a needle link in a haystack of links on an html page
         """
 
-        feed = session.get(self.org_root+endpoint, params=params, headers=headers, cookies=store)
+        feed = requests.post(Sedar().org_root+endpoint, params=params, headers=headers, cookies=cookies)
 
         output = StringIO(feed.text.encode('utf-8'))
         tree = etree.parse(output, etree.HTMLParser())
@@ -129,32 +138,29 @@ class Sedar():
 
         to_parse = []
 
-        headers = {
-            'User-Agent': 'DIY-FilingsResearch 0.1'
-        }
-
         initial_params = {
             'lang': 'EN',
-            'page_no': '1',
+            'page_no': 1,
             'company_search': ticker,
-            'document_selection': self.doc_type,
+            'document_selection': int(self.doc_type),
             'industry_group': 'A',
-            'FromMonth': self.start_month,
-            'FromDate': self.start_day,
-            'FromYear': self.start_year,
-            'ToMonth': self.end_month,
-            'ToDate': self.end_date,
-            'ToYear': self.end_year,
+            'FromMonth': int(self.start_month),
+            'FromDate': int(self.start_day),
+            'FromYear': int(self.start_year),
+            'ToMonth': int(self.end_month),
+            'ToDate': int(self.end_day),
+            'ToYear': int(self.end_year),
             'Variable': 'Issuer',
             'Search': 'Search'
         }
 
         session = requests.session()
 
-        initial_request = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=headers)
-        store = requests.utils.dict_from_cookiejar(initial_request.cookies)
+        initial_request = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params)
+        processed = initial_request.text.encode('utf-8')
+        self.__cookies['initial'] = requests.utils.dict_from_cookiejar(initial_request.cookies)
 
-        link = return_link("DisplayProfile", return_link("DisplayCompanyDocuments", return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", initial_params, 1)))
+        link = Sedar().return_link("DisplayProfile", Sedar().return_link("DisplayCompanyDocuments", Sedar().return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", self.__headers, self.__cookies['initial'], initial_params, 1), self.__headers, self.__cookies['initial']), self.__headers, self.__cookies['initial'])
 
         driver = selenium.webdriver.Firefox()
         driver.get(self.org_root+link)
@@ -165,7 +171,6 @@ class Sedar():
 
             if accept_cookies is None:
                 accept_cookies = driver.get_cookies()
-
             try:
                 driver.get_cookies()
             except selenium.common.exceptions.NoSuchWindowException:
@@ -173,11 +178,11 @@ class Sedar():
             except httplib.BadStatusLine:
                 break
 
-        cookies = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
-        feed = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=headers, cookies=store)
+        self.__cookies['download'] = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
+        feed = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=self.__headers, cookies=self.__cookies['download'])
 
-        processed = feed.text.encode('utf-8')
-        tree = etree.parse(StringIO(processed), etree.HTMLParser())
+        output = StringIO(feed.text.encode('utf-8'))
+        tree = etree.parse(output, etree.HTMLParser())
         links = list(tree.iter("form"))
 
         urls = [self.org_root+link.attrib['action'] for link in links]
@@ -185,8 +190,8 @@ class Sedar():
         for url in urls:
             to_parse.append({'url': url,
                              'type': 'POST',
-                             'headers': headers,
-                             'cookies': store
+                             'headers': self.__headers,
+                             'cookies': self.__cookies['download']
                             })
         return to_parse
 
@@ -196,7 +201,12 @@ class Edgar():
     EDGAR is document filing and retrieval system used by the SEC (US)
     """
 
+    __headers = {
+        'User-Agent': 'DIY-FilingsResearch 0.1'
+    }
+
     filing_types = ['10-K', '10-Q']
+
     doc_types = {
         'html': ["Document Format Files", ".htm", filing_types],
         'xbrl': ["Data Files", ".xml", "XBRL INSTANCE DOCUMENT"]
@@ -269,6 +279,7 @@ class Edgar():
                 output = self.page_search(tree, types)
                 if output and self.doc_type[1] in output:
                     to_parse.append({'url': self.org_root+output,
-                                     'type': 'GET'
+                                     'type': 'GET',
+                                     'headers': self.__headers,
                                     })
         return to_parse

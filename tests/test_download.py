@@ -25,10 +25,10 @@ def setup_module():
 def test_download_html():
     
     ingestor = Ingestor()
-    edgar = Edgar("html", "2014-01-01")
+    edgar = Edgar("html", "2013-01-01")
     ingestor.file_downloader(edgar.ingest_stock("AAPL"), docs_directory)
 
-    assert os.path.exists(docs_directory+"/d501596d10q.htm") == True
+    assert os.path.exists(docs_directory+"/a2124888z10-k.htm") == True
 
 @ping
 def test_download_xbrl():
