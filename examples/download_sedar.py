@@ -7,7 +7,7 @@ from ingestor import Ingestor, IngestorException, Sedar
 ingestor = Ingestor()
 
 # xbrl or html?
-edgar = Sedar("xbrl")
+sedar = Sedar("xbrl")
 
 docs_directory = "test"
 

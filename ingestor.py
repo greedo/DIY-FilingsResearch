@@ -101,7 +101,7 @@ class Sedar():
         else:
             self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
 
-            if self.start_date <= '1997-01-01':
+            if self.start_date <= datetime.datetime(1997, 1, 1, 0, 0):
                 raise IngestorException('use a start_date after 1/1/1997')
 
         self.start_month = self.start_date.month
