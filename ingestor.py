@@ -7,11 +7,13 @@ import xml.etree.ElementTree as ET
 from lxml import etree
 import concurrent.futures
 import requests, requests.utils
-import re
-import datetime
-import os
-import selenium
+from threading import Timer
 from selenium import webdriver
+import selenium
+import datetime
+import sys
+import os
+import re
 
 try:
     import httplib
@@ -120,6 +122,9 @@ class Sedar():
         else:
             self.doc_type = 26
 
+    def restart(self):
+        os.execv(__file__, sys.argv)
+
     @staticmethod
     def return_link(needle, endpoint, headers, cookies, params=None, index_offset=0):
         """
@@ -185,6 +190,7 @@ class Sedar():
             except httplib.BadStatusLine:
                 break
 
+        Timer(accept_cookies[0]['expiry'], self.restart, ()).start()
         self.__cookies['download'] = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
         feed = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=self.__headers, cookies=self.__cookies['download'])
 
