@@ -26,7 +26,7 @@ except ImportError:
 
 class Ingestor():
 
-    _HTML_decode = [
+    __HTML_decode = [
         ('%3A', '_'),
         ('%5C', '_')
     ]
@@ -60,7 +60,7 @@ class Ingestor():
                         local_filename = url['url'].split('/')[-1]
 
                         # clean up gross filenames
-                        for k, v in _HTML_decode:
+                        for k, v in self.__HTML_decode:
                             local_filename = local_filename.replace(k, v)
 
                         with open(directory+"/"+local_filename, 'wb') as handle:
