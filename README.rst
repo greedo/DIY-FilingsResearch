@@ -49,14 +49,6 @@ Then pass ``ingest_stock()`` with a stock ticker to ingest and a directory to st
 
     ingestor.file_downloader(edgar.ingest_stock("AAPL"), downloaded_docs_directory)
 
-Sedar Download Workflow Note
------------------------
-
-The ``Sedar`` workflow is very similar to the ``Edgar`` workflow except that you will see a browser window 
-launched. This is to capture cookies. Once the browser is launched you will need to click on a document link 
-on the page. This will open up a CAPTCHA window. Solve the CAPTCHA and then close all the browser windows. 
-The downloader should proceed normally assumed you solved the CAPTCHA correctly.
-
 Testing
 -------
 
