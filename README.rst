@@ -18,6 +18,45 @@ Requirements
 
 - Python >= 2.7 or >= 3.3
 
+Initialization
+--------------
+
+To start using the library, first import ``Ingestor`` and ``Edgar``
+
+::
+
+    from ingestor import Ingestor, Edgar
+
+``Edgar`` (US) and ``Sedar`` (Canada) are currently supported. Note however that the flows are a bit different.
+See the note at the bottom about the ``Sedar`` flow.
+
+Simple Download Workflow
+-----------------------
+
+First specific what kind of files using the new ``Edgar`` basic object
+
+::
+
+    ingestor = Ingestor()
+    edgar = Edgar("xbrl")
+
+``xbrl`` or ``html`` are currently supported
+
+Then pass ``ingest_stock()`` with a stock ticker to ingest and a directory to store the downloaded docs into 
+``file_downloader()``
+
+::
+
+    ingestor.file_downloader(edgar.ingest_stock("AAPL"), downloaded_docs_directory)
+
+Sedar Download Workflow Note
+-----------------------
+
+The ``Sedar`` workflow is very similar to the ``Edgar`` workflow except that you will see a browser window 
+launched. This is to capture cookies. Once the browser is launched you will need to click on a document link 
+on the page. This will open up a CAPTCHA window. Solve the CAPTCHA and then close all the browser windows. 
+The downloader should proceed normally assumed you solved the CAPTCHA correctly.
+
 Testing
 -------
 
