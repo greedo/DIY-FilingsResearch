@@ -48,6 +48,9 @@ Then pass ``ingest_stock()`` with a stock ticker to ingest and a directory to st
 ::
 
     ingestor.file_downloader(edgar.ingest_stock("AAPL"), downloaded_docs_directory)
+    
+See the `wiki <https://github.com/greedo/DIY-FilingsResearch/wiki/Using-the-document-ingestor#sedar-download-workflow-note>`__
+for a special note on ``Sedar`` parsing.
 
 Testing
 -------
