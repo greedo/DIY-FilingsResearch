@@ -58,18 +58,23 @@ class Indexer(threading.Thread):
 
 class Queryer():
 
-    def __init__(self, store_dir, hits_dir):
+    def __init__(self, store_dir, hits_dir, frags_dir=None):
 
         # store_dir is the location of our generated lucene index
         # hits_dir is the location of the highlighted document hits
+        # frags_dif is the location of the document hit fragments - optional
         self.store_dir = store_dir
         self.hits_dir = hits_dir
+        self.frags_dir = frags_dir
 
         if not os.path.exists(self.store_dir):
             os.mkdir(self.store_dir)
 
         if not os.path.exists(self.hits_dir):
             os.mkdir(self.hits_dir)
+
+        if self.frags_dir is not None and  not os.path.exists(self.frags_dir):
+            os.mkdir(self.frags_dir)
 
         self.directory = SimpleFSDirectory(File(self.store_dir))
 
@@ -116,5 +121,21 @@ class Queryer():
                 # arg 4: the separator used to intersperse the document fragments (typically "...")
                 # arg 3 and 4 don't really matter with NullFragmenter
                 result = highlighter.getBestFragments(tokenStream, doc.get("contents"), 2, "...")
-                file_handler = open(self.hits_dir+'/'+doc.get("name"), 'w+')
-                file_handler.write(result)
+
+                if len(result) > 10:
+                    file_handler = open(self.hits_dir+'/'+doc.get("name"), 'w+')
+                    file_handler.write(result)
+
+            # create hit fragments, if we want to show them
+            # arg 1: fragment size
+            highlighter.setTextFragmenter(SimpleFragmenter(200))
+
+            for scoreDoc in scoreDocs:
+                doc = searcher.doc(scoreDoc.doc)
+                tokenStream = analyzer.tokenStream("contents", StringReader(doc.get("contents")))
+
+                result = highlighter.getBestFragments(tokenStream, doc.get("contents"), 2, "...")
+
+                if len(result) > 10:
+                    file_handler = open(self.frags_dir+'/'+doc.get("name"), 'w+')
+                    file_handler.write(result)
