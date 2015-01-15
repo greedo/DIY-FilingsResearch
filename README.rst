@@ -18,6 +18,9 @@ Requirements
 
 - Python >= 2.7 or >= 3.3
 
+DIY-FilingsResearch relies on `PyLucene <http://lucene.apache.org/pylucene/>`__. 
+For installation directions see the `wiki <https://github.com/greedo/DIY-FilingsResearch/wiki/PyLucene-installation-guide>`__.
+
 Initialization
 --------------
 
