@@ -20,7 +20,7 @@ from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.document import Document, Field, TextField
 from org.apache.lucene.search.highlight import Highlighter, QueryScorer, SimpleFragmenter, NullFragmenter, SimpleHTMLFormatter
-from java.io import File, StringReader, PrintWriter
+from java.io import File
 
 class Indexer(threading.Thread):
 
