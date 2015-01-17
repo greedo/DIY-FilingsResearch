@@ -307,10 +307,10 @@ class Edgar():
             except Exception as e:
                 break
 
-            for item in ticker_feed.findall('{http://www.w3.org/2005/Atom}e\
-                 ntry'):
-                html_url = item[1].find('{http://www.w3.org/2005/Atom}f\
-                 iling-href').text.encode('ascii', 'ignore')
+            for item in ticker_feed.findall('{http://www.w3.org/2005/Atom' + \
+                 '}entry'):
+                html_url = item[1].find('{http://www.w3.org/2005/Atom}fi' + \
+                 'ling-href').text.encode('ascii', 'ignore')
 
                 output = StringIO(requests.get(html_url).text.encode('ascii',
                  'ignore').decode('utf-8'))

@@ -16,8 +16,10 @@ setup(
     author_email='jcabrera@eminorlabs.com',
     url='https://github.com/greedo/DIY-FilingsResearch/',
     license='Apache License',
-    keywords='Financial, Accounting, file formats, 10k, 10q, filings, edgar, sedar',
-    scripts=['threadedSearch.py', 'ingestor.py', 'examples/searcher.py', 'examples/download_edgar.py', 'examples/download_sedar.py'],
+    keywords='Financial, Accounting, file formats, 10k, 10q, filings, \
+     edgar, sedar',
+    scripts=['threadedSearch.py', 'ingestor.py', 'examples/searcher.py',
+     'examples/download_edgar.py', 'examples/download_sedar.py'],
     install_requires=['pytest', 'requests', 'lxml', 'futures', 'selenium'],
     classifiers=[
         'Intended Audience :: Developers',

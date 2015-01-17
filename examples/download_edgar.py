@@ -18,4 +18,5 @@ if not os.path.exists(docs_directory):
 # for every ticker in our input file, download all the relevant documents
 with open('edgar_tickers.txt', 'r') as reader:
     for line in reader:
-        ingestor.file_downloader(edgar.ingest_stock(line.rstrip()), docs_directory)
+        ingestor.file_downloader(edgar.ingest_stock(line.rstrip()),
+         docs_directory)

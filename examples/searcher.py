@@ -6,7 +6,10 @@ from ingestor import Ingestor, Edgar, Sedar
 import signal
 import lucene
 
-# before we quit we always want to close the writer to prevent corruptions to the index
+# before we quit we always want to close the writer
+# to prevent corruptions to the index
+
+
 def quit_gracefully(*args):
     queryer.writer.close()
     print "Cleaning up and terminating"
@@ -15,7 +18,7 @@ def quit_gracefully(*args):
 # always declare the signal handler first
 signal.signal(signal.SIGINT, quit_gracefully)
 
-env=lucene.initVM()
+env = lucene.initVM()
 queryer = Queryer("index", "hits")
 print 'Using Directory: ', queryer.store_dir
 
@@ -30,11 +33,13 @@ edgar = Edgar()
 
 with open('data.txt', 'r') as reader:
     for line in reader:
-        ingestor.file_downloader(edgar.ingest_stock(line.rstrip()), directoryToWalk)
+        ingestor.file_downloader(edgar.ingest_stock(line.rstrip()),
+         directoryToWalk)
         indexer.indexDocs()
 
 # start up the terminal query interface
 queryer.run(queryer.writer, queryer.analyzer)
 
-# if return from Querying then call the signal handler to clean up the writer cleanly
+# if return from Querying then call the signal handler
+# to clean up the writer cleanly
 quit_gracefully()
