@@ -6,7 +6,8 @@ from __future__ import absolute_import, print_function
 import xml.etree.ElementTree as ET
 from lxml import etree
 import concurrent.futures
-import requests, requests.utils
+import requests
+import requests.utils
 from threading import Timer
 from selenium import webdriver
 import selenium
@@ -35,8 +36,9 @@ class Ingestor():
 
     def file_downloader(self, urls, directory):
         """
-        file_downloader asynchronously downloads all required documents using threads.
-        By default the max number of threads running asynchronously is 5, but you can
+        file_downloader asynchronously downloads all required
+        documents using threads. By default the max number of
+        threads running asynchronously is 5, but you can
         adjust this for your own system.
         """
 
@@ -45,13 +47,16 @@ class Ingestor():
 
         def load_url(url, timeout):
             if url['type'] == "GET":
-                request = requests.get(url['url'], headers=url['headers'], stream=True, timeout=timeout)
+                request = requests.get(url['url'], headers=url['headers'],
+                    stream=True, timeout=timeout)
             elif url['type'] == "POST":
-                request = requests.post(url['url'], headers=url['headers'], cookies=url['cookies'], stream=True, timeout=timeout)
+                request = requests.post(url['url'], headers=url['headers'],
+                    cookies=url['cookies'], stream=True, timeout=timeout)
             return request
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_url = {executor.submit(load_url, url, 60): url for url in urls}
+            future_to_url = \
+                {executor.submit(load_url, url, 60): url for url in urls}
             for future in concurrent.futures.as_completed(future_to_url):
                 url = future_to_url[future]
                 try:
@@ -65,7 +70,8 @@ class Ingestor():
                         for k, v in self.__HTML_decode:
                             local_filename = local_filename.replace(k, v)
 
-                        with open(directory+"/"+local_filename, 'wb') as handle:
+                        with open(directory + "/" + local_filename,
+                         'wb') as handle:
                             for block in data.iter_content(chunk_size=1024):
                                 if not block:
                                     break
@@ -79,14 +85,14 @@ class Ingestor():
 class IngestorException(Exception):
     pass
 
+
 class Sedar():
     """
     SEDAR is document filing and retrieval system used by the CSA (Canada)
     """
 
     __cookies = {'initial': None,
-                 'download': None
-                }
+                 'download': None}
 
     __headers = {
         'User-Agent': 'DIY-FilingsResearch 0.1'
@@ -99,7 +105,8 @@ class Sedar():
         if start_date is None:
             self.start_date = datetime.datetime(1997, 1, 1, 0, 0)
         else:
-            self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
+            self.start_date = datetime.datetime.strptime(start_date,
+                "%Y-%d-%m")
 
             if self.start_date <= datetime.datetime(1997, 1, 1, 0, 0):
                 raise IngestorException('use a start_date after 1/1/1997')
@@ -126,12 +133,14 @@ class Sedar():
         os.execv(__file__, sys.argv)
 
     @staticmethod
-    def return_link(needle, endpoint, headers, cookies, params=None, index_offset=0):
+    def return_link(needle, endpoint, headers, cookies,
+     params=None, index_offset=0):
         """
         return_link finds a needle link in a haystack of links on an html page
         """
 
-        feed = requests.post(Sedar().org_root+endpoint, params=params, headers=headers, cookies=cookies)
+        feed = requests.post(Sedar().org_root + endpoint, params=params,
+            headers=headers, cookies=cookies)
 
         output = StringIO(feed.text.encode('utf-8'))
         tree = etree.parse(output, etree.HTMLParser())
@@ -139,13 +148,13 @@ class Sedar():
 
         for l in range(0, len(links)):
             if needle in links[l].attrib['href']:
-                return links[l-index_offset].attrib['href']
+                return links[l - index_offset].attrib['href']
                 break
 
     def ingest_stock(self, ticker):
         """
-        ingest_stock essentially scrapes the site for the actual documents we need to download.
-        It uses a ticker or keyword.
+        ingest_stock essentially scrapes the site for the actual documents
+        we need to download. It uses a ticker or keyword.
         """
 
         to_parse = []
@@ -168,14 +177,24 @@ class Sedar():
 
         session = requests.session()
 
-        initial_request = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params)
+        initial_request = session.post(self.org_root + "/\
+        FindCompanyDocuments.do", params=initial_params)
         processed = initial_request.text.encode('utf-8')
-        self.__cookies['initial'] = requests.utils.dict_from_cookiejar(initial_request.cookies)
-
-        link = Sedar().return_link("DisplayProfile", Sedar().return_link("DisplayCompanyDocuments", Sedar().return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do", self.__headers, self.__cookies['initial'], initial_params, 1), self.__headers, self.__cookies['initial']), self.__headers, self.__cookies['initial'])
+        self.__cookies['initial'] = \
+            requests.utils.dict_from_cookiejar(initial_request.cookies)
+        link = Sedar().return_link("DisplayProfile",
+            Sedar().return_link("DisplayCompanyDocuments",
+            Sedar().return_link("AcceptTermsOfUse", "/FindCompanyDocuments.do",
+            self.__headers,
+            self.__cookies['initial'],
+            initial_params,
+            1), self.__headers,
+            self.__cookies['initial']),
+            self.__headers,
+            self.__cookies['initial'])
 
         driver = selenium.webdriver.Firefox()
-        driver.get(self.org_root+link)
+        driver.get(self.org_root + link)
         accept_cookies = None
         print("once you accept you can close the window")
 
@@ -191,21 +210,23 @@ class Sedar():
                 break
 
         Timer(accept_cookies[0]['expiry'], self.restart, ()).start()
-        self.__cookies['download'] = {cookie['name'] : cookie['value'] for cookie in accept_cookies}
-        feed = session.post(self.org_root+"/FindCompanyDocuments.do", params=initial_params, headers=self.__headers, cookies=self.__cookies['download'])
+        self.__cookies['download'] = \
+            {cookie['name']: cookie['value'] for cookie in accept_cookies}
+        feed = session.post(self.org_root + "/\
+         FindCompanyDocuments.do", params=initial_params,
+            headers=self.__headers, cookies=self.__cookies['download'])
 
         output = StringIO(feed.text.encode('utf-8'))
         tree = etree.parse(output, etree.HTMLParser())
         links = list(tree.iter("form"))
 
-        urls = [self.org_root+link.attrib['action'] for link in links]
+        urls = [self.org_root + link.attrib['action'] for link in links]
 
         for url in urls:
             to_parse.append({'url': url,
                              'type': 'POST',
                              'headers': self.__headers,
-                             'cookies': self.__cookies['download']
-                            })
+                             'cookies': self.__cookies['download']})
         return to_parse
 
 
@@ -222,8 +243,7 @@ class Edgar():
 
     doc_types = {
         'html': ["Document Format Files", ".htm", filing_types],
-        'xbrl': ["Data Files", ".xml", "XBRL INSTANCE DOCUMENT"]
-        }
+        'xbrl': ["Data Files", ".xml", "XBRL INSTANCE DOCUMENT"]}
 
     def __init__(self, doc_type=None, start_date=None, end_date=None):
         self.org_root = "http://www.sec.gov"
@@ -231,7 +251,8 @@ class Edgar():
         if start_date is None:
             self.start_date = datetime.datetime(1970, 1, 1, 0, 0)
         else:
-            self.start_date = datetime.datetime.strptime(start_date, "%Y-%d-%m")
+            self.start_date = datetime.datetime.strptime(start_date,
+                "%Y-%d-%m")
 
         if end_date is None:
             self.end_date = datetime.datetime.now().date()
@@ -269,30 +290,34 @@ class Edgar():
 
     def ingest_stock(self, ticker):
         """
-        ingest_stock essentially scrapes the site for the actual documents we need to download.
-        It uses a ticker or keyword.
+        ingest_stock essentially scrapes the site for the actual
+        documents we need to download. It uses a ticker or keyword.
         """
 
         to_parse = []
 
         for types in self.doc_type[2]:
-            feed = requests.get(self.org_root+'/cgi-bin/browse-edgar', params={'action': 'getcompany', 'CIK': ticker, 'type': types, 'dateb': str(self.start_date.strftime("%Y-%d-%m")), 'count': 200, 'output': 'atom'})
+            feed = requests.get(self.org_root + '/cgi-bin/browse-edgar',
+                params={'action': 'getcompany', 'CIK': ticker, 'type': types,
+                'dateb': str(self.start_date.strftime("%Y-%d-%m")),
+                'count': 200, 'output': 'atom'})
 
             try:
                 ticker_feed = ET.fromstring(feed.text.encode('utf-8'))
             except Exception as e:
                 break
 
-            for item in ticker_feed.findall('{http://www.w3.org/2005/Atom}entry'):
-                html_url = item[1].find('{http://www.w3.org/2005/Atom}filing-href').text.encode('ascii','ignore')
+            for item in ticker_feed.findall('{http://www.w3.org/2005/Atom}e\
+                 ntry'):
+                html_url = item[1].find('{http://www.w3.org/2005/Atom}f\
+                 iling-href').text.encode('ascii', 'ignore')
 
-                output = StringIO(requests.get(html_url).text.encode('ascii','ignore').decode('utf-8'))
+                output = StringIO(requests.get(html_url).text.encode('ascii',
+                 'ignore').decode('utf-8'))
                 tree = etree.parse(output, etree.HTMLParser())
-        
                 output = self.page_search(tree, types)
                 if output and self.doc_type[1] in output:
-                    to_parse.append({'url': self.org_root+output,
+                    to_parse.append({'url': self.org_root + output,
                                      'type': 'GET',
-                                     'headers': self.__headers,
-                                    })
+                                     'headers': self.__headers})
         return to_parse
