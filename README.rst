@@ -34,7 +34,7 @@ To start using the library, first import ``Ingestor`` and ``Edgar``
 See the note at the bottom about the ``Sedar`` flow.
 
 Simple Download Workflow
------------------------
+------------------------
 
 First specific what kind of files using the new ``Edgar`` basic object
 
@@ -56,7 +56,7 @@ See the `wiki <https://github.com/greedo/DIY-FilingsResearch/wiki/Using-the-docu
 for a special note on ``Sedar`` parsing.
 
 Live Demo
---------------
+---------
 
 See DIY-FilingsResearch in action: http://finfeed.io/index
 
