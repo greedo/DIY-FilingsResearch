@@ -18,6 +18,49 @@ Requirements
 
 - Python >= 2.7 or >= 3.3
 
+DIY-FilingsResearch relies on `PyLucene <http://lucene.apache.org/pylucene/>`__. 
+For installation directions see the `wiki <https://github.com/greedo/DIY-FilingsResearch/wiki/PyLucene-installation-guide>`__.
+
+Initialization
+--------------
+
+To start using the library, first import ``Ingestor`` and ``Edgar``
+
+::
+
+    from ingestor import Ingestor, Edgar
+
+``Edgar`` (US) and ``Sedar`` (Canada) are currently supported. Note however that the flows are a bit different.
+See the note at the bottom about the ``Sedar`` flow.
+
+Simple Download Workflow
+------------------------
+
+First specific what kind of files using the new ``Edgar`` basic object
+
+::
+
+    ingestor = Ingestor()
+    edgar = Edgar("xbrl")
+
+``xbrl`` or ``html`` are currently supported
+
+Then pass ``ingest_stock()`` with a stock ticker to ingest and a directory to store the downloaded docs into 
+``file_downloader()``
+
+::
+
+    ingestor.file_downloader(edgar.ingest_stock("AAPL"), downloaded_docs_directory)
+    
+See the `wiki <https://github.com/greedo/DIY-FilingsResearch/wiki/Using-the-document-ingestor#sedar-download-workflow-note>`__
+for a special note on ``Sedar`` parsing.
+
+Live Demo
+---------
+
+See DIY-FilingsResearch in action: http://finfeed.io/index
+
+
 Testing
 -------
 
