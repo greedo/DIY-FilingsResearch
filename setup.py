@@ -10,7 +10,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='DIY-FilingsResearch',
-    version='0.2.3',
+    version='0.3.0',
     description='library for analyzing company financial documents',
     author='Joe Cabrera',
     author_email='jcabrera@eminorlabs.com',
